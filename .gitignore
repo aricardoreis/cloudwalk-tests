@@ -39,3 +39,6 @@ dist/**/*
 
 # ignore yarn.lock
 yarn.lock
+
+# does not ignore .log files inside assets folder
+!assets/**/*.log
