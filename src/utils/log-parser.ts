@@ -43,11 +43,14 @@ export function mapLogToMatches(lines: string[]): IMatch[] {
       // TODO is there a better way to extract log information using regex?
       const [left, right] = line.split("killed").map((x) => x.trim());
 
-      const leftSplitted = left.split(" ");
-      const killer = leftSplitted[leftSplitted.length - 1];
+      const leftSplitted = left.split(":");
+      // careful about killer names with spaces
+      const killer = leftSplitted[leftSplitted.length - 1].trim();
 
       const rightSplitted = right.split(" ");
-      const victim = rightSplitted[0];
+      // careful about victim names with spaces
+      // gets from 0 to -2 because the last element is always "by MOD_SOMETHING"
+      const victim = rightSplitted.slice(0, -2).join(" ");
       const deathCause = rightSplitted[rightSplitted.length - 1];
 
       currentMatch.addKill(killer, victim, deathCause as DeathCauseName);
