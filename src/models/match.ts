@@ -7,6 +7,8 @@ export interface IMatch {
   addKill(player: string, victim: string): void;
 }
 
+export interface IGroupedMatch extends Record<string, IMatch> {}
+
 export default class Match implements IMatch {
   id: string;
   total_kills: number;
@@ -30,7 +32,7 @@ export default class Match implements IMatch {
       console.log(`New player added: ${player}.`);
     }
   }
-  
+
   addKill(killer: string, victim: string): void {
     console.log(`${killer} killed ${victim}.`);
 
