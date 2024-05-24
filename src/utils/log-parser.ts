@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import IMatchInfo from "../models/match";
+import Match, { IMatch } from "../models/match";
 
 export function readLogFile(filePath: string): string | undefined {
   if (!fs.existsSync(filePath)) {
@@ -18,15 +18,12 @@ export function readLogLines(logContent: string): string[] {
   }
 }
 
-export function mapLogToMatches(lines: string[]): IMatchInfo[] {
-  const matches: IMatchInfo[] = [];
-  let currentMatch: IMatchInfo = {
-    id: "",
-    total_kills: 0,
-    players: [],
-    kills: {},
-  };
+export function mapLogToMatches(lines: string[]): IMatch[] {
+  const matches: IMatch[] = [];
+
+  let currentMatch: IMatch = new Match("");
   let incrementalMatchId = 1;
+
   for (const line of lines) {
     if (line.includes("InitGame:")) {
       if (currentMatch.id) {
@@ -35,23 +32,12 @@ export function mapLogToMatches(lines: string[]): IMatchInfo[] {
 
         console.log(`New match found: ${JSON.stringify(currentMatch)}`);
       }
-      currentMatch = {
-        id: `game-${incrementalMatchId}`,
-        total_kills: 0,
-        players: [],
-        kills: {},
-      };
-      console.log(`New match found: ${currentMatch.id}`);
+      currentMatch = new Match(`game-${incrementalMatchId}`);
     }
 
     if (line.includes("ClientUserinfoChanged:")) {
-      // TODO is there a better way to extract log information using regex?
       const player = line.split("\\")[1];
-      if (!currentMatch.players.includes(player)) {
-        console.log(`New player found: ${player}.`);
-        currentMatch.players.push(player);
-        currentMatch.kills[player] = 0;
-      }
+      currentMatch.addPlayer(player);
     }
 
     if (line.includes("Kill:")) {
@@ -61,19 +47,7 @@ export function mapLogToMatches(lines: string[]): IMatchInfo[] {
       const killer = leftSplitted[leftSplitted.length - 1];
       const victim = right.split(" ")[0];
 
-      console.log(`${killer} killed ${victim}.`);
-
-      // TODO create a constants file to keep fixed values
-      if (!currentMatch.players.includes(killer)) {
-        if (killer === "<world>") {
-          // victim loses a kill when killed by world
-          currentMatch.kills[victim]--;
-        } else {
-          currentMatch.kills[killer]++;
-        }
-      }
-
-      currentMatch.total_kills++;
+      currentMatch.addKill(killer, victim);
     }
   }
 
