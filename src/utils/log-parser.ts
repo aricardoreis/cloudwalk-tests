@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import Match, { IMatch } from "../models/match";
+import { DeathCauseName } from "../models/death_cause";
 
 export function readLogFile(filePath: string): string | undefined {
   if (!fs.existsSync(filePath)) {
@@ -29,8 +30,6 @@ export function mapLogToMatches(lines: string[]): IMatch[] {
       if (currentMatch.id) {
         matches.push(currentMatch);
         incrementalMatchId++;
-
-        console.log(`New match found: ${JSON.stringify(currentMatch)}`);
       }
       currentMatch = new Match(`game-${incrementalMatchId}`);
     }
@@ -43,17 +42,20 @@ export function mapLogToMatches(lines: string[]): IMatch[] {
     if (line.includes("Kill:")) {
       // TODO is there a better way to extract log information using regex?
       const [left, right] = line.split("killed").map((x) => x.trim());
+
       const leftSplitted = left.split(" ");
       const killer = leftSplitted[leftSplitted.length - 1];
-      const victim = right.split(" ")[0];
 
-      currentMatch.addKill(killer, victim);
+      const rightSplitted = right.split(" ");
+      const victim = rightSplitted[0];
+      const deathCause = rightSplitted[rightSplitted.length - 1];
+
+      currentMatch.addKill(killer, victim, deathCause as DeathCauseName);
     }
   }
 
   // include last match
   matches.push(currentMatch);
-  console.log(`New match found: ${JSON.stringify(currentMatch)}`);
 
   return matches;
 }
