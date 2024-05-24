@@ -1,13 +1,17 @@
-export interface IMatch {
-  id: string;
+import IEntity from "./entity";
+
+export interface IMatchInfo {
   total_kills: number;
   players: string[];
   kills: Record<string, number>;
+}
+
+export interface IGroupedMatch extends Record<string, IMatchInfo> {}
+
+export interface IMatch extends IMatchInfo, IEntity {
   addPlayer(player: string): void;
   addKill(player: string, victim: string): void;
 }
-
-export interface IGroupedMatch extends Record<string, IMatch> {}
 
 export default class Match implements IMatch {
   id: string;
