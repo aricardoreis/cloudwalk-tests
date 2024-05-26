@@ -7,8 +7,9 @@ console.info(`>>> ${message} <<<`);
 
 const logFilePath = "./assets/qgames.log";
 
+// TODO create a class to keep the parser logic
 const content = readLogFile(logFilePath);
-// TODO check a better way to handle nullable values in typescript
+
 const lines = readLogLines(content ?? '');
 console.info(`>>> There are ${lines?.length} lines in the log file <<<`);
 
